@@ -1,0 +1,51 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Cliente {
+  id            Int       @id @default(autoincrement())
+  nome          String
+  nomeSocial    String
+  cpf           String    @unique
+  rg            String
+  telefone      String
+  dataCadastro  DateTime  @default(now())
+  genero        String   // Novo campo opcional (gênero do cliente)
+  consumos      Consumo[] // Relacionamento com Consumo
+}
+
+model Produto {
+  id           Int       @id @default(autoincrement())
+  nome         String
+  preco        Float
+  quantidade   Int?
+  consumos     Consumo[] // Relacionamento com Consumo
+}
+
+model Servico {
+  id           Int       @id @default(autoincrement())
+  nome         String
+  preco        Float
+  quantidade   Int?
+  consumos     Consumo[] // Relacionamento com Consumo
+}
+
+model Consumo {
+  id          Int      @id @default(autoincrement())
+  clienteId   Int
+  cliente     Cliente  @relation(fields: [clienteId], references: [id])
+  tipo        String   // 'produto' ou 'servico'
+  produtoId   Int?     // Pode ser nulo se o tipo for 'servico'
+  servicoId   Int?     // Pode ser nulo se o tipo for 'produto'
+  quantidade  Int      // Quantidade consumida
+  total       Float    // Valor total gasto (quantidade * preço)
+  data        DateTime @default(now())
+
+  produto     Produto? @relation(fields: [produtoId], references: [id])
+  servico     Servico? @relation(fields: [servicoId], references: [id])
+}
